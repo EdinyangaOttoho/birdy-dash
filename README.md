@@ -1,6 +1,6 @@
 # Birdy Dash
 A sweet canvas-based HTML5 game that features a bird dodging flames and picking bonus (super) coins.
-It's an endless runner game an quite addictive
+It's an endless runner game and quite addictive
 
 ## Usage
 Just open the game.html file. It doesn't need a web server!! Goodluck
