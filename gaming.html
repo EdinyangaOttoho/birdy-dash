@@ -328,7 +328,9 @@
                 char = glob[index];
                 char.x -= motion_speed;
                 if (char.x <= -10) {
-                    top_scores();
+                    if (char.purpose == "enemy") {
+                        top_scores();
+                    }
                     glob.splice(index, 1);
                     index-=1;
                 }
