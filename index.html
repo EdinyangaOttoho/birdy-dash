@@ -546,6 +546,7 @@
             high_score = parseInt(localStorage.getItem("high_score"));
             if (scores > high_score) {
                 localStorage.setItem("high_score", scores.toString());
+                high_score = scores;
                 new_high_score = `<span style="color:hotpink">NEW HIGH SCORE!!</span><br/><br/>`;
             }
         }
