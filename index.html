@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <head>
-    <meta name="viewport" content="user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="viewport" content="user-scalable=0,width=device-width,initial-scale=0.7"/>
     <title>Birdy Dash</title>
     <style>
         body * {
             font-family:century gothic!important;
+            box-sizing:border-box;
         }
         #screen {
             position:fixed;
@@ -562,15 +563,31 @@
         //38 - up
         //40 - down
         if (event.keyCode == 38) {
-            if (player_y >= limiter.min_y + 10) {
-                player_y -= player_speed;
-            }
+            move_up();
         }
         else if (event.keyCode == 40) {
-            if (player_y <= limiter.max_y - 90) {
-                player_y += player_speed;
-            }
+            move_down();
         }
     });
+    document.body.addEventListener("mousedown", (event)=> {
+        let mid = (screen_y / 2) - 10;
+        let max = screen_y;
+        if (event.offsetY >= 0 && event.offsetY <= mid - 1) {
+            move_up();
+        }
+        else if (event.offsetY >= mid && event.offsetY <= max) {
+            move_down();
+        }
+    });
+    let move_up = ()=> {
+        if (player_y >= limiter.min_y + 10) {
+            player_y -= player_speed;
+        }
+    }
+    let move_down = ()=> {
+        if (player_y <= limiter.max_y - 90) {
+            player_y += player_speed;
+        }
+    }
 </script>
 </html>
