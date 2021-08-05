@@ -540,16 +540,19 @@
 
         //do after effect
         var high_score = 0;
+        var new_high_score = "";
         if (localStorage.getItem("high_score")) {
             high_score = parseInt(localStorage.getItem("high_score"));
             if (scores > high_score) {
                 localStorage.setItem("high_score", scores.toString());
+                new_high_score = `<span style="color:hotpink">NEW HIGH SCORE!!</span><br/><br/>`;
             }
         }
         else {
             localStorage.setItem("high_score", scores.toString());
         }
         document.getElementById("stats-game").innerHTML = `
+            ${new_high_score}
             You scored: ${scores}<br/><br/>
             <span style="color:lightgreen">Top Score: ${high_score}</span>
         `;
