@@ -101,6 +101,8 @@
     var player_speed = 25;
     var supers_manager;
     var scores = 0;
+    var background_music = new Audio("./assets/sounds/background.mp3");
+    background_music.loop = true;
     var index = 0;
 
     var supers = {
@@ -135,276 +137,291 @@
 
     //renderer
     document.body.onload = ()=> {
-        start_game();
+        setTimeout(function() {
+            start_game();
+        }, 2000);
     }
     let start_game = ()=> {
-        let player = {
-            img:null,
-            frames:[],
-            bounds: {
-                x1:0,
-                y1:0,
-                x2:0,
-                y2:0
+        background_music.play();
+        setTimeout(function() {
+            let player = {
+                img:null,
+                frames:[],
+                bounds: {
+                    x1:0,
+                    y1:0,
+                    x2:0,
+                    y2:0
+                }
+            };
+            for (let i = 1; i <= 7; i++) {
+                let img = new Image(80, 80);
+                img.src = `./assets/player/${i}.gif`;
+                player.frames.push(img);
             }
-        };
-        for (let i = 1; i <= 7; i++) {
-            let img = new Image(80, 80);
-            img.src = `./assets/player/${i}.gif`;
-            player.frames.push(img);
-        }
 
-        player.img = player.frames[0];
+            player.img = player.frames[0];
 
-        let cnt = 0;
-        let animator = ()=> {
-            player.img = player.frames[cnt];
-            cnt++;
-            if (cnt == player.frames.length - 1) {
-                playback_speed -= 0.04;
-                cnt = 0;
+            let cnt = 0;
+            let animator = ()=> {
+                player.img = player.frames[cnt];
+                cnt++;
+                if (cnt == player.frames.length - 1) {
+                    playback_speed -= 0.04;
+                    cnt = 0;
+                }
+                clearTimeout(player_animation);
+                setTimeout(animator, playback_speed);
             }
-            clearTimeout(player_animation);
-            setTimeout(animator, playback_speed);
-        }
 
-        speed_up = setInterval(()=> {
-            motion_speed += 0.5;
-            player_speed += 1.5;
-            //increase speed
-        }, 40000);
+            speed_up = setInterval(()=> {
+                motion_speed += 0.5;
+                player_speed += 1.5;
+                //increase speed
+            }, 40000);
 
-        function shuffle(array) {
-            var currentIndex = array.length,  randomIndex;
-            while (0 !== currentIndex) {
-                randomIndex = Math.floor(Math.random() * currentIndex);
-                currentIndex--;
-                [array[currentIndex], array[randomIndex]] = [
-                array[randomIndex], array[currentIndex]];
+            function shuffle(array) {
+                var currentIndex = array.length,  randomIndex;
+                while (0 !== currentIndex) {
+                    randomIndex = Math.floor(Math.random() * currentIndex);
+                    currentIndex--;
+                    [array[currentIndex], array[randomIndex]] = [
+                    array[randomIndex], array[currentIndex]];
+                }
+                return array;
             }
-            return array;
-        }
 
-        character_manager = setInterval(()=> {
-            let x = screen_x;
-            let steps = [];
-            for (let i = 10; i <= screen_y - 15; i+= 88) {
-                steps.push(i);
-            }
-            shuffle(steps);
-            let y_values = [];
-            let rand = Math.floor(Math.random() * 3) + 1;
-            for (let i = 0; i < rand; i++) {
-                y_values.push(steps[i]);
-            }
-            let img = new Image();
-            img.src = './assets/flames.png';
-            for (let y of y_values) {
-                glob.push({
-                   x:x,
-                   y:y,
-                   img:img,
-                   type:"enemy",
-                   purpose:"enemy",
-                   size:60,
-                   bounds:{
-                       x1:x,
-                       y1:y,
-                       x2:x+60,
-                       y2:y+60
-                   }
-                });
-            }
-        }, 1000);
-
-        bonus_manager = setInterval(()=> {
-            let x = screen_x - 50;
-            let steps = [];
-            for (let i = 10; i <= screen_y - 55; i+= 100) {
-                steps.push(i);
-            }
-            shuffle(steps);
-            let type = "bonus-"+Math.floor(Math.random() * 3);
-            let img = new Image();
-            img.src = `./assets/${type}.png`;
-
-            let allow_push = false;
-
-            switch (type) {
-                case "bonus-0":
-                    if (supers.invincible.enabled == false) {
-                        allow_push = true;
-                    }
-                break;
-                case "bonus-1":
-                    if (supers.x2_points.enabled == false) {
-                        allow_push = true;
-                    }
-                break;
-                case "bonus-2":
-                    if (supers.x5_points.enabled == false) {
-                        allow_push = true;
-                    }
-                break;
-            }
-            if (allow_push == true) {
-                glob.push({
+            character_manager = setInterval(()=> {
+                let x = screen_x;
+                let steps = [];
+                for (let i = 10; i <= screen_y - 15; i+= 88) {
+                    steps.push(i);
+                }
+                shuffle(steps);
+                let y_values = [];
+                let rand = Math.floor(Math.random() * 3) + 1;
+                for (let i = 0; i < rand; i++) {
+                    y_values.push(steps[i]);
+                }
+                let img = new Image();
+                img.src = './assets/flames.png';
+                for (let y of y_values) {
+                    let shoot = new Audio('./assets/sounds/fire.mp3');
+                    shoot.play();
+                    glob.push({
                     x:x,
-                    y:steps[0],
+                    y:y,
                     img:img,
-                    type:type,
-                    purpose:"bonus",
-                    size:45,
+                    type:"enemy",
+                    purpose:"enemy",
+                    size:60,
                     bounds:{
                         x1:x,
-                        y1:steps[0],
-                        x2:x+45,
-                        y2:steps[0]+45
+                        y1:y,
+                        x2:x+60,
+                        y2:y+60
                     }
-                });
-            }
-            
-        }, 900);
-
-        supers_manager = setInterval(function() {
-            for (let i in supers) {
-                if (supers[i].enabled == true) {
-                    supers[i].countdown--;
-                    if (supers[i].countdown == 0) {
-                        supers[i].enabled = false;
-                    }
-                    let percent = Math.round((supers[i].countdown/20)*100);
-                    switch(i) {
-                        case "x2_points":
-                            document.querySelector(".x2").style.width = `${percent}%`;
-                        break;
-                        case "x5_points":
-                            document.querySelector(".x5").style.width = `${percent}%`;
-                        break;
-                        case "invincible":
-                            percent = Math.round((supers[i].countdown/10)*100);
-                            document.querySelector(".inv").style.width = `${percent}%`;
-                        break;
-                    }
+                    });
                 }
-            }
-        }, 1000);
+            }, 1000);
 
-        player_animation = setTimeout(animator, playback_speed);
-
-        let main = ()=> {
-            resize_screen();
-            frame_loop = setInterval(update, 10);
-        }
-        let resize_screen = ()=> {
-            
-            let x = window.innerWidth;
-            let y = window.innerHeight;
-
-            limiter.min_y = 0;
-            limiter.max_y = y;
-
-            screen.setAttribute("width", x);
-            screen.setAttribute("height", y);
-
-            screen_x = x;
-            screen_y = y;
-
-            player_y = (y/2) - 40;
-        }
-        let autoresize = ()=> {
-            let x = window.innerWidth;
-            let y = window.innerHeight;
-            ctx.canvas.width = x;
-            ctx.canvas.heigh = y;
-
-            limiter.min_y = 0;
-            limiter.max_y = y;
-
-            screen_x = x;
-            screen_y = y;
-        }
-        let fit_player_bounds = (x1, y1, x2, y2)=> {
-            player.bounds.x1 = x1;
-            player.bounds.y1 = y1;
-            player.bounds.x2 = x2;
-            player.bounds.y2 = y2;
-        }
-        let update = ()=> {
-            //autoresize canvas to fit screen
-            autoresize();
-
-            //render screen
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(0, 0, screen_x, screen_y);
-
-            //render assets
-            for (index = 0; index < glob.length; index++) {
-                char = glob[index];
-                char.x -= motion_speed;
-                if (char.x <= -10) {
-                    if (char.purpose == "enemy") {
-                        top_scores();
-                    }
-                    glob.splice(index, 1);
-                    index-=1;
+            bonus_manager = setInterval(()=> {
+                let x = screen_x - 50;
+                let steps = [];
+                for (let i = 10; i <= screen_y - 55; i+= 100) {
+                    steps.push(i);
                 }
-                ctx.drawImage(char.img, char.x, char.y, char.size, char.size);
-                char.bounds.x1 = char.x;
-                char.bounds.y1 = char.y;
-                char.bounds.x2 = char.x+char.size;
-                char.bounds.y2 = char.y+char.size;
-                detect_collision(player.bounds, char.bounds, char.purpose, char.type, index);
-            }
-            //draw supers
-            if (supers.invincible.enabled == true) {
-                ctx.filter = "opacity(0.3) brightness(200%)";
-                ctx.drawImage(player.img, player_x, player_y);
-                ctx.filter = "none";
-                let crown = new Image();
-                crown.src = './assets/crown.png';
-                ctx.drawImage(crown, player.bounds.x2 + 5, player.bounds.y1 - 10, 20, 20);
-            }
-            else {
-                ctx.drawImage(player.img, player_x, player_y);
-            }
-            fit_player_bounds(player_x, player_y, player_x + 80, player_y + 80);
-        }
-        let detect_collision = (player_, char_, purpose_, type_, index_)=> {
-            let perform_action = (category)=> {
+                shuffle(steps);
+                let type = "bonus-"+Math.floor(Math.random() * 3);
+                let img = new Image();
+                img.src = `./assets/${type}.png`;
+
+                let allow_push = false;
+
+                switch (type) {
+                    case "bonus-0":
+                        if (supers.invincible.enabled == false) {
+                            allow_push = true;
+                        }
+                    break;
+                    case "bonus-1":
+                        if (supers.x2_points.enabled == false) {
+                            allow_push = true;
+                        }
+                    break;
+                    case "bonus-2":
+                        if (supers.x5_points.enabled == false) {
+                            allow_push = true;
+                        }
+                    break;
+                }
+                if (allow_push == true) {
+                    glob.push({
+                        x:x,
+                        y:steps[0],
+                        img:img,
+                        type:type,
+                        purpose:"bonus",
+                        size:45,
+                        bounds:{
+                            x1:x,
+                            y1:steps[0],
+                            x2:x+45,
+                            y2:steps[0]+45
+                        }
+                    });
+                }
                 
-            }
+            }, 900);
 
-            if (char_.x1 < player_.x2 - 20 && char_.x2 > player_.x1 + 20 && char_.y1 < player_.y2 - 20 && char_.y2 > player_.y1 + 20) {
-                if (purpose_ == "enemy") {
-                    if (supers.invincible.enabled == false) {
-                        glob.splice(index_, 1);
-                        setTimeout(function() {
-                            game_over();
-                            clearInterval(frame_loop);
-                            clearInterval(supers_manager);
-                        }, 300);
+            supers_manager = setInterval(function() {
+                for (let i in supers) {
+                    if (supers[i].enabled == true) {
+                        supers[i].countdown--;
+                        if (supers[i].countdown == 0) {
+                            supers[i].enabled = false;
+                        }
+                        let percent = Math.round((supers[i].countdown/20)*100);
+                        switch(i) {
+                            case "x2_points":
+                                document.querySelector(".x2").style.width = `${percent}%`;
+                            break;
+                            case "x5_points":
+                                document.querySelector(".x5").style.width = `${percent}%`;
+                            break;
+                            case "invincible":
+                                percent = Math.round((supers[i].countdown/10)*100);
+                                document.querySelector(".inv").style.width = `${percent}%`;
+                            break;
+                        }
                     }
+                }
+            }, 1000);
+
+            player_animation = setTimeout(animator, playback_speed);
+
+            let main = ()=> {
+                resize_screen();
+                frame_loop = setInterval(update, 10);
+            }
+            let resize_screen = ()=> {
+                
+                let x = window.innerWidth;
+                let y = window.innerHeight;
+
+                limiter.min_y = 0;
+                limiter.max_y = y;
+
+                screen.setAttribute("width", x);
+                screen.setAttribute("height", y);
+
+                screen_x = x;
+                screen_y = y;
+
+                player_y = (y/2) - 40;
+            }
+            let autoresize = ()=> {
+                let x = window.innerWidth;
+                let y = window.innerHeight;
+                ctx.canvas.width = x;
+                ctx.canvas.heigh = y;
+
+                limiter.min_y = 0;
+                limiter.max_y = y;
+
+                screen_x = x;
+                screen_y = y;
+            }
+            let fit_player_bounds = (x1, y1, x2, y2)=> {
+                player.bounds.x1 = x1;
+                player.bounds.y1 = y1;
+                player.bounds.x2 = x2;
+                player.bounds.y2 = y2;
+            }
+            let update = ()=> {
+                //autoresize canvas to fit screen
+                autoresize();
+
+                //render screen
+                ctx.fillStyle = "#ffffff";
+                ctx.fillRect(0, 0, screen_x, screen_y);
+
+                //sunlight
+                ctx.beginPath();
+                ctx.arc(screen_x / 1.1, 40, screen_x / 5, 0, Math.PI * 2);
+                ctx.fillStyle = "khaki";
+                ctx.fill();
+                ctx.closePath();
+
+                //render assets
+                for (index = 0; index < glob.length; index++) {
+                    char = glob[index];
+                    char.x -= motion_speed;
+                    if (char.x <= -10) {
+                        if (char.purpose == "enemy") {
+                            top_scores();
+                        }
+                        glob.splice(index, 1);
+                        index-=1;
+                    }
+                    ctx.drawImage(char.img, char.x, char.y, char.size, char.size);
+                    char.bounds.x1 = char.x;
+                    char.bounds.y1 = char.y;
+                    char.bounds.x2 = char.x+char.size;
+                    char.bounds.y2 = char.y+char.size;
+                    detect_collision(player.bounds, char.bounds, char.purpose, char.type, index);
+                }
+                //draw supers
+                if (supers.invincible.enabled == true) {
+                    ctx.filter = "opacity(0.3) brightness(200%)";
+                    ctx.drawImage(player.img, player_x, player_y);
+                    ctx.filter = "none";
+                    let crown = new Image();
+                    crown.src = './assets/crown.png';
+                    ctx.drawImage(crown, player.bounds.x2 + 5, player.bounds.y1 - 10, 20, 20);
                 }
                 else {
-                    glob.splice(index_, 1);
-                    index -= 1;
-                    if (type_ == "bonus-0") {
-                        supers.invincible.enabled = true;
-                        supers.invincible.countdown = 10;
+                    ctx.drawImage(player.img, player_x, player_y);
+                }
+                fit_player_bounds(player_x, player_y, player_x + 80, player_y + 80);
+            }
+            let detect_collision = (player_, char_, purpose_, type_, index_)=> {
+                if (char_.x1 < player_.x2 - 20 && char_.x2 > player_.x1 + 20 && char_.y1 < player_.y2 - 20 && char_.y2 > player_.y1 + 20) {
+                    if (purpose_ == "enemy") {
+                        if (supers.invincible.enabled == false) {
+                            glob.splice(index_, 1);
+                            index_ -= 1;
+                            setTimeout(function() {
+                                game_over();
+                            }, 50);
+                        }
                     }
-                    else if (type_ == "bonus-1") {
-                        supers.x2_points.enabled = true;
-                        supers.x2_points.countdown = 20;
-                    }
-                    if (type_ == "bonus-2") {
-                        supers.x5_points.enabled = true;
-                        supers.x5_points.countdown = 20;
+                    else {
+                        let coin = new Audio('./assets/sounds/coin-collect.mp3');
+                        coin.play();
+                        glob.splice(index_, 1);
+                        index -= 1;
+                        if (type_ == "bonus-0") {
+                            supers.invincible.enabled = true;
+                            supers.invincible.countdown = 10;
+                            setTimeout(function() {
+                                let gameover = new Audio("./assets/sounds/king.wav");
+                                gameover.play();
+                            }, 80);
+                        }
+                        else if (type_ == "bonus-1") {
+                            supers.x2_points.enabled = true;
+                            supers.x2_points.countdown = 20;
+                        }
+                        if (type_ == "bonus-2") {
+                            supers.x5_points.enabled = true;
+                            supers.x5_points.countdown = 20;
+                        }
                     }
                 }
             }
-        }
-        main();
+            main();
+        }, 1500);
     }
     let top_scores = ()=> {
         if (supers.x5_points.enabled == true) {
@@ -419,7 +436,15 @@
         document.getElementById("scores").innerHTML = scores.toString();
     }
     let game_over = ()=> {
+        background_music.pause();
+        clearInterval(frame_loop);
+        clearInterval(supers_manager);
+        clearInterval(character_manager);
 
+        let gameover = new Audio("./assets/sounds/over.wav");
+        gameover.play();
+
+        //do after effect
     }
     //controller
     document.body.addEventListener("keydown", (event)=> {
