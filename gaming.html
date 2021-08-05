@@ -91,6 +91,7 @@
 </body>
 <script>
     var screen = document.getElementById("screen");
+    var ctx = screen.getContext("2d");
     var frame_loop;
     var player_animation;
     var speed_up;
@@ -292,13 +293,14 @@
         player_animation = setTimeout(animator, playback_speed);
 
         let main = ()=> {
-            let screen_bounds = document.body.getBoundingClientRect();
-            let screen_width = screen_bounds.width;
-            let screen_height = screen_bounds.height;
-            resize_screen(screen_width, screen_height);
+            resize_screen();
             frame_loop = setInterval(update, 10);
         }
-        let resize_screen = (x, y)=> {
+        let resize_screen = ()=> {
+            
+            let x = window.innerWidth;
+            let y = window.innerHeight;
+
             limiter.min_y = 0;
             limiter.max_y = y;
 
@@ -310,6 +312,18 @@
 
             player_y = (y/2) - 40;
         }
+        let autoresize = ()=> {
+            let x = window.innerWidth;
+            let y = window.innerHeight;
+            ctx.canvas.width = x;
+            ctx.canvas.heigh = y;
+
+            limiter.min_y = 0;
+            limiter.max_y = y;
+
+            screen_x = x;
+            screen_y = y;
+        }
         let fit_player_bounds = (x1, y1, x2, y2)=> {
             player.bounds.x1 = x1;
             player.bounds.y1 = y1;
@@ -317,7 +331,8 @@
             player.bounds.y2 = y2;
         }
         let update = ()=> {
-            let ctx = screen.getContext("2d");
+            //autoresize canvas to fit screen
+            autoresize();
 
             //render screen
             ctx.fillStyle = "#ffffff";
@@ -344,9 +359,15 @@
             //draw supers
             if (supers.invincible.enabled == true) {
                 ctx.filter = "opacity(0.3) brightness(200%)";
+                ctx.drawImage(player.img, player_x, player_y);
+                ctx.filter = "none";
+                let crown = new Image();
+                crown.src = './assets/crown.png';
+                ctx.drawImage(crown, player.bounds.x2 + 5, player.bounds.y1 - 10, 20, 20);
             }
-            ctx.drawImage(player.img, player_x, player_y);
-            ctx.filter = "none";
+            else {
+                ctx.drawImage(player.img, player_x, player_y);
+            }
             fit_player_bounds(player_x, player_y, player_x + 80, player_y + 80);
         }
         let detect_collision = (player_, char_, purpose_, type_, index_)=> {
@@ -357,9 +378,12 @@
             if (char_.x1 < player_.x2 - 20 && char_.x2 > player_.x1 + 20 && char_.y1 < player_.y2 - 20 && char_.y2 > player_.y1 + 20) {
                 if (purpose_ == "enemy") {
                     if (supers.invincible.enabled == false) {
-                        game_over();
-                        clearInterval(frame_loop);
-                        clearInterval(supers_manager);
+                        glob.splice(index_, 1);
+                        setTimeout(function() {
+                            game_over();
+                            clearInterval(frame_loop);
+                            clearInterval(supers_manager);
+                        }, 300);
                     }
                 }
                 else {
