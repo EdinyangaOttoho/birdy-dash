@@ -570,7 +570,7 @@
             move_down();
         }
     });
-    document.body.addEventListener("touchstart", (event)=> {
+    screen.addEventListener("touchstart", (event)=> {
         let mid = (screen_y / 2) - 10;
         let max = screen_y;
         if (event.clientY >= 0 && event.clientY <= mid - 1) {
@@ -580,7 +580,7 @@
             mobile_manager(1);
         }
     });
-    document.body.addEventListener("touchend", (event)=> {
+    screen.addEventListener("touchend", (event)=> {
         clearInterval(move_timer);
     });
     var move_timer = setInterval(function() {
