@@ -3,6 +3,9 @@
     <meta name="viewport" content="user-scalable=0,width=device-width,initial-scale=1.0"/>
     <title>Birdy Dash</title>
     <style>
+        body * {
+            font-family:century gothic!important;
+        }
         #screen {
             position:fixed;
             top:0px;
@@ -47,11 +50,97 @@
         #scores {
             color:gold
         }
+        .overlay {
+            position:fixed;
+            top:0px;
+            left:0px;
+            width:100vw;
+            height:100vh;
+            z-index:5;
+            box-sizing:border-box;
+            align-items:center;
+            justify-content:center;
+            padding:30px;
+            overflow-y:auto;
+            display:none;
+            animation:fade-in 0.5s ease-in-out forwards;
+        }
+        @keyframes fade-in {
+            from {
+                opacity:0
+            }
+            to {
+                opacity:1
+            }
+        }
+
+        #launch {
+            background-color:cornflowerblue;
+            display:flex;
+        }
+        #gameover  {
+            background-color:rgba(0,0,0,0.8);
+        }
+        .card {
+            background-color:steelblue;
+            width:450px;
+            max-width:90vw;
+            box-sizing:border-box;
+            padding:20px;
+            padding-top:60px;
+            padding-bottom:60px;
+        }
+        .widget {
+            padding:20px;
+            width:100%;
+            outline:none;
+            cursor:pointer;
+            border-radius:5px;
+            border:0px;
+            color:white;
+            font-size:20px;
+            font-weight:bolder;
+            font-family:century gothic;
+            transition:0.3s;
+        }
+        .widget:hover {
+            filter:brightness(180%)
+        }
+        .w-red {
+            background-color:tomato;
+        }
+        .w-blue {
+            background-color:cornflowerblue;
+        }
+        #stats-game {
+            font-size:18px;
+            margin-bottom:5px;
+            color:khaki;
+            font-weight:bold;
+        }
     </style>
 </head>
+<div class="overlay" id="launch">
+    <div class="card">
+        <center>
+            <h2 style="color:gold">Birdy Dash</h2>
+        </center>
+        <button class="widget w-red" onclick="start_game()">Start game</button>
+    </div>
+</div>
+<div class="overlay" id="gameover">
+    <div class="card">
+        <center>
+            <h2 style="color:white">GAME OVER!</h2>
+            <div id="stats-game"></div>
+            <br/>
+            <button class="widget w-red" onclick="location.href='index.html'">Exit</button>
+        </center>
+    </div>
+</div>
 <body style="margin:0px;width:100vw;height:100vh">
     <canvas id="screen" height="0" width="0" style="cursor:hand"></canvas>
-    <div class="score-board">
+    <div class="score-board" style="display:none">
         <center>
             <h4 style="margin:10px">Score: <span id="scores">0</span></h4>
         </center>
@@ -137,11 +226,14 @@
 
     //renderer
     document.body.onload = ()=> {
-        setTimeout(function() {
+        if (location.hash == "#restart") {
+            document.querySelector(".score-board").click();
             start_game();
-        }, 2000);
+        }
     }
     let start_game = ()=> {
+        document.getElementById("launch").style.display = "none";
+        document.querySelector(".score-board").style.display = "block";
         background_music.play();
         setTimeout(function() {
             let player = {
@@ -443,8 +535,23 @@
 
         let gameover = new Audio("./assets/sounds/over.wav");
         gameover.play();
+        document.getElementById("gameover").style.display = "flex";
 
         //do after effect
+        var high_score = 0;
+        if (localStorage.getItem("high_score")) {
+            high_score = parseInt(localStorage.getItem("high_score"));
+            if (scores > high_score) {
+                localStorage.setItem("high_score", scores.toString());
+            }
+        }
+        else {
+            localStorage.setItem("high_score", scores.toString());
+        }
+        document.getElementById("stats-game").innerHTML = `
+            You scored: ${scores}<br/>
+            <span style="color:lightgreen">Top Score: ${high_score}</span>
+        `;
     }
     //controller
     document.body.addEventListener("keydown", (event)=> {
