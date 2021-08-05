@@ -569,16 +569,35 @@
             move_down();
         }
     });
-    document.body.addEventListener("mousedown", (event)=> {
+    document.body.addEventListener("touchstart", (event)=> {
         let mid = (screen_y / 2) - 10;
         let max = screen_y;
         if (event.offsetY >= 0 && event.offsetY <= mid - 1) {
-            move_up();
+            mobile_manager(0);
         }
         else if (event.offsetY >= mid && event.offsetY <= max) {
-            move_down();
+            mobile_manager(1);
         }
     });
+    document.body.addEventListener("touchend", (event)=> {
+        clearInterval(move_timer);
+    });
+    let move_timer = setInterval(function() {
+        //init
+    }, 50);
+    let mobile_manager = (x)=> {
+        clearInterval(move_timer);
+        if (x == 0) {
+            move_timer = setInterval(function() {
+                move_up();
+            }, 50);
+        }
+        else {
+            move_timer = setInterval(function() {
+                move_down();
+            }, 50);
+        }
+    }
     let move_up = ()=> {
         if (player_y >= limiter.min_y + 10) {
             player_y -= player_speed;
