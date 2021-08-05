@@ -292,12 +292,18 @@
             character_manager = setInterval(()=> {
                 let x = screen_x;
                 let steps = [];
-                for (let i = 10; i <= screen_y - 15; i+= 88) {
+                let increment = 88;
+                let counts = 3;
+                if (window.innerWidth <= 600) {
+                    increment = 60;
+                    counts = 5;
+                }
+                for (let i = 10; i <= screen_y - 15; i+= increment) {
                     steps.push(i);
                 }
                 shuffle(steps);
                 let y_values = [];
-                let rand = Math.floor(Math.random() * 3) + 1;
+                let rand = Math.floor(Math.random() * counts) + 1;
                 for (let i = 0; i < rand; i++) {
                     y_values.push(steps[i]);
                 }
