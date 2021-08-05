@@ -141,7 +141,7 @@
     </div>
 </div>
 <body style="margin:0px;width:100vw;height:100vh">
-    <canvas id="screen" height="0" width="0" style="cursor:hand"></canvas>
+    <canvas id="screen" height="0" width="0" style="cursor:pointer"></canvas>
     <div class="score-board" style="display:none">
         <center>
             <h4 style="margin:10px">Score: <span id="scores">0</span></h4>
@@ -587,7 +587,6 @@
         //init
     }, 50);
     let mobile_manager = (x)=> {
-        clearInterval(move_timer);
         if (x == 0) {
             move_timer = setInterval(function() {
                 move_up();
