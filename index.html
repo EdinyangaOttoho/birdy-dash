@@ -582,6 +582,8 @@
     document.body.addEventListener("keydown", (event)=> {
         //38 - up
         //40 - down
+        key_combinations.push(event.keyCode);
+        checkCheat();
         if (event.keyCode == 38) {
             move_up();
         }
@@ -589,6 +591,22 @@
             move_down();
         }
     });
+    let checkCheat = function() {
+        let cheat = "";
+        if (key_combinations.length >= 5) {
+            cheat = key_combinations.slice(key_combinations.length - 5, key_combinations.length).join("");
+            if (cheat == "5152525153") {
+                supers.invincible.enabled = true;
+                supers.invincible.countdown = 10;
+                setTimeout(function() {
+                    let gameover = new Audio("./assets/sounds/king.wav");
+                    gameover.play();
+                }, 80);
+                key_combinations = [];
+            }
+        }
+    }
+    var key_combinations = [];
     document.body.addEventListener("touchstart", (event)=> {
         var touchobj = event.changedTouches[0];
         let mid = (screen_y / 2) - 10;
